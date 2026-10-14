@@ -1,0 +1,28 @@
+# Dataset lokal
+/train/
+/my_val/
+
+# Checkpoint training
+/checkpoints/
+
+# Starter kit asli dosen
+/starter_kit/
+
+# Hasil evaluasi lokal
+/evaluation_result.json
+
+# Python cache
+__pycache__/
+*.py[cod]
+
+# Jupyter checkpoints
+.ipynb_checkpoints/
+
+# Virtual environments
+/.venv/
+/venv/
+/env/
+
+# File sistem operasi
+.DS_Store
+Thumbs.db
