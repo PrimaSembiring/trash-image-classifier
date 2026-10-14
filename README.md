@@ -36,7 +36,7 @@ Model klasifikasi gambar untuk lima kategori sampah menggunakan EfficientNet-B0 
 
 | Putaran | Commit | Macro-F1 (split validasi lokal) | Macro-F1 (diumumkan asisten) |
 |---|---|---:|---|
-| Preview 1 (14 Okt) | Belum dicatat | **0.9563** (epoch terbaik: 5) | Belum diumumkan |
+| Preview 1 (14 Okt) | 14 Oktober 2026 | **0.9563** (epoch terbaik: 5) | |
 | Preview 2 (21 Okt) | — | — | — |
 | Final (25 Okt) | — | — | — |
 
