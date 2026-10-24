@@ -8,18 +8,43 @@ Model klasifikasi gambar untuk lima kategori sampah menggunakan EfficientNet-B0 
 
 | No. | Nama Lengkap | NIM | Kontribusi utama |
 |---:|---|---|---|
-| 1 | Prima Agusta Sembiring | 123140119 | Training dan evaluasi model |
+| 1 | Prima Agusta Sembiring | 123140119 | Experimen, Training dan Evaluasi model |
 | 2 | Gohan Tua Jeremia Ambarita | 123140160 | EDA dan dokumentasi |
-| 3 | Rian Rafael Sangap Tamba | 123140190 | Eksperimen, persiapan submission, dan pengujian |
+| 3 | Rian Rafael Sangap Tamba | 123140190 | Persiapan submission, dan pengujian |
 
 ## Ringkasan Pendekatan
 
-- **Arsitektur / backbone:** EfficientNet-B0 dengan classifier ber-output 5 kelas.
-- **Strategi pelatihan:** seed `42`, total 10 epoch, 2 epoch awal dengan backbone dibekukan, lalu pelatihan dilanjutkan. Learning rate classifier/head `0.001`, learning rate backbone `0.0001`, dan weight decay `0.0001`. Bobot terbaik dipilih berdasarkan Macro-F1 validasi.
-- **Data tambahan:** Tidak menggunakan data tambahan di luar dataset kompetisi.
-- **Ukuran input & preprocessing:** input `224 × 224`; gambar diubah ukurannya menjadi 256, lalu `CenterCrop(224)`, dikonversi ke tensor, dan dinormalisasi menggunakan mean serta standard deviation ImageNet.
-- **Pembagian data:** 2.753 gambar secara keseluruhan, dengan split train/validasi 80:20 (`seed=42`): 2.202 gambar train dan 551 gambar validasi.
-- **Lingkungan dan library:** Python, Jupyter Notebook, PyTorch, dan Torchvision.
+### Eksperimen awal: EfficientNet-B0
+
+EfficientNet-B0 digunakan sebagai model awal karena merupakan arsitektur CNN yang relatif efisien dan lazim dipakai sebagai baseline untuk klasifikasi gambar. Pada hasil validasi lokal yang tercatat, EfficientNet-B0 memperoleh **accuracy 0.9564** dan **Macro-F1 0.9563**. Hasil ini sudah baik sebagai baseline, tetapi masih ada ruang untuk mencoba pendekatan yang mempunyai representasi fitur visual pretrained lebih kuat.
+
+### Beralih ke DINOv2 ViT-S/14
+
+Eksperimen berikutnya menggunakan DINOv2 ViT-S/14, yaitu backbone Vision Transformer dengan bobot pretrained dari metode self-supervised learning. DINOv2 dipilih untuk menguji apakah fitur visual yang dipelajari dari kumpulan gambar besar dapat membantu membedakan kategori sampah pada dataset proyek ini. Skor validasi terbaru DINOv2 yang didapat dalam eksperimen adalah **0.9890**.
+
+## Gambaran Umum DINOv2 ViT-S/14
+
+DINOv2 merupakan keluarga model computer vision yang dikembangkan oleh Meta AI Research dan diumumkan pada **17 April 2023**. Tujuannya adalah mempelajari representasi visual yang berguna untuk berbagai tugas computer vision tanpa memerlukan label kelas pada tahap pretraining. Model pretrained ini dapat digunakan sebagai backbone, lalu disesuaikan dengan tugas tertentu melalui classifier atau fine-tuning.
+
+Sumber resmi:
+- [Pengumuman DINOv2 dari Meta AI (17 April 2023)](https://ai.meta.com/blog/dino-v2-computer-vision-self-supervised-learning/)
+- [Paper DINOv2 di arXiv](https://arxiv.org/abs/2304.07193)
+- [Repository resmi DINOv2](https://github.com/facebookresearch/dinov2)
+
+### Varian utama DINOv2
+
+Repository resmi menyediakan beberapa ukuran backbone berikut. Jumlah parameter adalah perkiraan pada backbone, bukan ukuran dataset pretraining.
+
+| Varian | Perkiraan parameter backbone | Gambaran umum |
+|---|---:|---|
+| ViT-S/14 | 21 juta | Small; lebih ringan dan sesuai untuk eksperimen dengan sumber daya terbatas |
+| ViT-B/14 | 86 juta | Base; lebih besar dan membutuhkan komputasi lebih banyak |
+| ViT-L/14 | 300 juta | Large; jauh lebih besar |
+| ViT-g/14 | 1,1 miliar | Giant; kebutuhan komputasi dan memori paling tinggi di antara varian utama tersebut |
+
+Tersedia juga varian **with registers**, yaitu model dengan empat register tokens tambahan. Proyek ini menggunakan `vit_small_patch14_dinov2.lvd142m` tanpa register tokens. Karena itu, angka dan deskripsi varian lain di tabel hanya menjadi gambaran umum, bukan model yang digunakan untuk submission.
+
+Rujukan model dan jumlah parameter: [README resmi DINOv2](https://github.com/facebookresearch/dinov2) dan [Model Card DINOv2](https://github.com/facebookresearch/dinov2/blob/main/MODEL_CARD.md).
 
 ## Ringkasan Dataset
 
@@ -36,17 +61,10 @@ Model klasifikasi gambar untuk lima kategori sampah menggunakan EfficientNet-B0 
 
 | Putaran | Commit | Macro-F1 (split validasi lokal) | Macro-F1 (diumumkan asisten) |
 |---|---|---:|---|
-| Preview 1 (14 Okt) | 14 Oktober 2026 | **0.9563** (epoch terbaik: 5) | |
+| Preview 1 (14 Okt) | 14 Oktober 2026 | **0.9563** | **0.9222** |
 | Preview 2 (21 Okt) | — | — | — |
-| Final (25 Okt) | — | — | — |
+| Final (25 Okt) | 24 Oktober 2026 | **0.9890** |  | 
 
-Metrik tambahan pada split validasi lokal untuk epoch terbaik:
-
-- **Validation accuracy:** 0.9564
-- **Macro precision:** 0.9559
-- **Macro recall:** 0.9572
-
-> Skor di atas merupakan hasil validasi lokal dari notebook training dan belum tentu sama dengan skor hidden validation yang dihitung oleh asisten dosen. Isi kolom commit dengan hash commit yang diserahkan untuk putaran terkait, serta isi kolom Macro-F1 diumumkan asisten setelah hasil resmi tersedia.
 
 ## Cara Menjalankan Evaluasi
 
@@ -64,13 +82,13 @@ Training dan eksperimen dilakukan melalui notebook `notebooks/02_efficientnet_b0
 
 ```text
 trash-image-classifier/
-├── README.md
-├── evaluate.py                 # Evaluator resmi dari dosen
 ├── .gitignore
+├── README.md
+├── evaluate.py
 ├── notebooks/
-│   └── 01_EDA.ipynb
-│   └── 02_efficientnet_b0.ipynb
+│   ├── 01_efficientnet_b0.ipynb  # Eksperimen awal / baseline
+│   └── 02_dinov2_vits14.ipynb    # Eksperimen utama DINOv2
 └── submission/
-    ├── model.py                # get_model() dan get_transform()
-    └── model.pth               # state_dict bobot terbaik
+    ├── model.py                  # get_model() dan get_transform()
+    └── model.pth                 # state_dict model final
 ```
